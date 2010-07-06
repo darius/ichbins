@@ -1,0 +1,14 @@
+#!/bin/sh
+# Usage: clump outfile sourcefiles
+# Compile sourcefiles into an executable named outfile.
+
+outfile=${1}
+shift
+
+./lump ../ichbins.scm "$@" | awk '
+  NR == 1 && /^=/ { $1 = ""; }
+  /^f$/           { $1 = ""; }
+                  { print; }
+' >tmp.c
+
+gcc -g2 -Wall tmp.c -o ${outfile}

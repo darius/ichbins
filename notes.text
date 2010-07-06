@@ -1,0 +1,141 @@
+add an optional param to bless, naming the executable to bless.
+also, blessing doesn't update the C reference anymore...
+
+it looks like we don't use global vars enough to make them truly
+indispensable; try getting rid of them. generate the symbol table
+specially. this avoids any possible circular-initialization problems,
+too.
+
+make dotted pairs impossible
+
+how to do closures:
+ * switch to stop-and-copy to handle variable-sized objects gracefully
+ * make flat closures, leaving out globals? 
+   but linked environments are probably simpler.
+ * only handle up to 10 (say) slots in a frame, to not need arithmetic
+ * reserve a tag for procedures
+ * (probably) use direct jumps for calls to known procedures, for speed
+
+how to do curses:
+ * tty-write-char (adds to the display buffer for the next refresh-screen)
+ * tty-plant-cursor (on the next refresh, cursor will be placed at current pos)
+ * tty-refresh
+ * tty-get-key
+ * tty-set-up, tty-tear-down (could be implicit if we use them always)
+ * tty-key-waiting? (a bit of a frill)
+ - expect a fixed terminal size?
+ - we need some persistence mechanism for the editor
+ - for games and such we also need timeouts
+
+can we deal with circular-initialization problems without too much 
+extra complexity?
+
+get rid of the tail? param by inspecting the top of code-stack?
+
+bring back booleans and symbols as disjoint types?
+booleans because it's awkward to initialize and use sym_f/sym_t.
+  [silly idea: use () and \t instead for false and true.]
+symbols because it's error-prone when they're not disjoint.
+
+maybe define a struct with car and cdr fields and delete the car() and
+cdr() functions. rename heap_index() to something more concise like at().
+
+see how far you can squeeze the bootstrap interpreter, just for fun.
+also, why's it like hundreds of times slower than the compiled compiler?
+
+maybe we could cut down on source lines by adding some kind
+of mapping/iterating form. maybe.
+
+and of course we could save a few lines by using C-style
+identifiers only. bleah.
+
+
+
+DONE:
+types: nil, pair, character
+
+simpler syntax for chars: \c
+
+don't bother with dotted pairs, i guess
+
+similarly, a string is just a list of chars, read and printed
+specially
+
+a symbol is a string that happens to be in the symbol table, also read
+and printed specially
+
+use t and nil, or some such, for booleans.
+actually maybe we should include booleans as a disjoint type.
+but see how we do with this for now.
+
+  (cond ((eq? proc 'eq?)          (eq? (car args) (cadr args)))
+        ((eq? proc 'null?)        (null? (car args)))
+        ((eq? proc 'pair?)        (pair? (car args)))
+        ((eq? proc 'char?)        (char? (car args)))
+        ((eq? proc 'cons)         (cons (car args) (cadr args)))
+        ((eq? proc 'car)          (car (car args)))
+        ((eq? proc 'cdr)          (cdr (car args)))
+        ((eq? proc 'set-car!)     (set-car! (car args) (cadr args)))
+        ((eq? proc 'read-char)    (read-char))
+        ((eq? proc 'peek-char)    (peek-char))
+        ((eq? proc 'write-char)   (write-char (car args)))
+        ((eq? proc 'abort)        (abort))  ; actually (error x)
+
+use a unique-tag list for the EOF object (not a disjoint type)
+and a global variable naming it
+
+language: like icbins but with global vars, no get-global, and the
+above simplifications
+
+simplify it by outputting lines in reverse order
+(so the declarations at the top naturally are emitted last;
+and we avoid a couple gotos too.)
+
+make read-char/peek-char return () on eof
+
+change evseq to require a nonnull list
+
+switch from (error) back to (abort) as a primitive
+
+give the test driver more smarts about the output:
+  - nicer multiline expectations
+  - be able to get both non-error output and the terminating error
+also, some emacs support for the test driver
+
+require the cdr of a list to be a list -- simplifies code elsewhere
+
+interpreter & devel strategy: like 'Later.text' plans for icbins
+
+primitives left:
+        ((eq? proc 'set-cdr!)     (set-cdr! (car args) (cadr args)))
+and null? is dispensable
+
+look for other language simplifications since we're abandoning Scheme
+compatibility:
+
+(let var expr)
+(define (fn var ...) expr ...)
+
+use functional i/o? sort of need multiple-value support of some kind...
+and lists of chars are less primitive than read/write-char
+so no, i don't think so
+
+make cond default to 'f when running out of clauses. this can save a
+line when writing for-eaches (like (cond ((null? xs) 'ok) ). So, that
+saves 5 lines net. But I don't really like it. Most of those lines were
+for predicates rather than for-eaches, etc. But still, many conds-for-effect
+read more nicely without the default clause, so this goes in.
+
+get rid of (snarf) and make the compiler do its own reading as it goes
+along? this makes the compiler harder to reuse, though.
+
+simplify the compiler by accumulating def-names and def-exprs in
+separate lists? I don't think so...
+
+(express e syms) has different arg order from other functions with syms
+
+write code-emission in this style: (emit "foo;" (emit "bar;" 'ignored)) ?
+(to allow back-to-front emission with front-to-back-looking code)
+(has an efficiency cost though. kind of ugly in its own way.)
+
+capitalize Obj?

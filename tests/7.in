@@ -1,0 +1,7 @@
+(define (write-line cs)
+  (cond ((null? cs) (write-char \
+))
+        ('t (write-char (car cs))
+            (write-line (cdr cs)))))
+
+(write-line '"Hello, world!")

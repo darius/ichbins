@@ -1,0 +1,2 @@
+(define (string? x) (cond ((null? x) (quote t)) ((char? x) (quote f)) ((char? (car x)) (string? (cdr x))) ((quote t) (quote f))))
+(define (string=? s t) (cond ((null? s) (null? t)) ((null? t) (quote f)) ((eq? (car s) (car t)) (string=? (cdr s) (cdr t))) ((quote t) (quote f))))

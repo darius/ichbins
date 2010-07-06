@@ -1,0 +1,65 @@
+ICHBINS
+
+This is a self-hosting compiler of a Lisp dialect to C in 6 pages of
+code. I've tried to make it as simple as possible, with almost no
+concessions to performance or extra functionality -- it's meant to be
+educational rather than useful.
+
+
+QUICK START
+
+    $ git clone git@github.com:darius/ichbins.git
+(Or get a tarball from http://github.com/darius/ichbins)
+    $ cd ichbins
+    $ make
+
+To compile a program named foo.scm and then run it:
+    $ ./ichbins <foo.scm >foo.c
+    $ cc foo.c -o foo
+    $ ./foo
+
+To make a change to the compiler and rebuild it, just typing 'make'
+isn't sufficient because of the circular dependency. 'make' will build
+an executable named ichbins2, compiling the current source with the
+previous executable. To replace that executable, type './bless', which
+does two tests:
+
+    * That the tests in the tests/ directory pass.
+
+    * That the old and new versions of the compiler executable produce
+      the same C output from the compiler source. This test typically
+      passes for routine changes to the source, but it's perfectly OK
+      for it to fail; you should just be sure you can say why this case
+      is expected. Then do 'mv ichbins2 ichbins' by hand and do ./bless 
+      again; this time it must pass, or something's buggered.
+
+The Lisp dialect implemented here is undocumented, but there's also a
+quick-and-dirty interpreter for it in C in boot-terp/. (I don't know if
+it can still interpret the compiler by now.)
+
+
+MOTIVATION
+
+I'm a nut who wants to grow a beautiful wholeness from tiny beginnings.
+This is a rewrite of 'icbins', which had the same larger goal in mind
+but a more immediate focus on playing with bootstrapping.
+
+Direct influences include:
+
+Steele & Sussman, "The Art of the Interpreter"
+http://library.readscheme.org/page1.html
+
+Marc Feeley, "Scheme in 90 Minutes"
+http://www.iro.umontreal.ca/~boucherd/mslug/meetings/20041020/minutes-en.html
+(which compiles a more powerful Scheme subset, but is longer and not
+self-hosting)
+
+The name 'ichbins' could stand for "I Can Hardly Believe It's Not Scheme!"
+
+
+LICENSE & CONTACT
+
+Copyright 2007 Darius Bacon under the terms of the MIT X license
+found at http://www.opensource.org/licenses/mit-license.html
+
+Darius Bacon <darius@wry.me>

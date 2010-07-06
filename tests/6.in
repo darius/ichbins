@@ -1,0 +1,12 @@
+  (define (string? x)
+    (cond ((null? x) 't)
+          ((char? x) 'f)
+          ((char? (car x)) (string? (cdr x)))
+          ('t 'f)))
+
+  (define (string=? s t)
+    (cond ((null? s) (null? t))
+          ((null? t) 'f)
+          ((eq? (car s) (car t)) (string=? (cdr s) (cdr t)))
+          ('t 'f)))
+

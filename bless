@@ -1,0 +1,10 @@
+#!/bin/sh
+
+make &&
+
+(cd tests; ./testall ../ichbins2) &&
+
+./ichbins2 <ichbins.scm >ichbins3.c &&
+diff -u ichbins2.c ichbins3.c &&
+
+mv ichbins2 ichbins

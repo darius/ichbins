@@ -1,0 +1,10 @@
+#!/bin/sh
+
+compile=$1; shift
+f=$1; shift
+
+$compile <$f.l >$f.c     || exit `./complain $f did not compile`
+gcc -g2 -Wall $f.c -o $f || exit `./complain $f.c did not compile`
+
+./$f <$f.in >$f.out      || exit `./complain Error in $f`
+diff $f.ref $f.out       || exit `./complain Mismatch in $f`
