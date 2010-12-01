@@ -87,7 +87,7 @@
 	((eq? c \\) (read-char-literal (read-char)))
 	((eq? c \") (read-string (read-char)))
 	((eq? c \() (read-list))
-	((eq? c \') (cons 'quote (cons (read) '())))
+	((eq? c \') (cons 'quote (list1 (read))))
 	((eq? c \)) (error "Unbalanced parentheses"))
 	('t (intern (cons c (read-symbol (peek-char)))))))
 
