@@ -5,48 +5,48 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef unsigned obj;
+typedef unsigned Obj;
 typedef enum  { a_pair, nil, a_char } Tag;
-static Tag      get_tag (obj x)   { return 3 & x; }
-static obj      entag (Tag tag, unsigned value)
+static Tag      get_tag (Obj x)   { return 3 & x; }
+static Obj      entag (Tag tag, unsigned value)
                                   { return tag | (value << 2); }
-static unsigned untag (Tag tag, obj x)
+static unsigned untag (Tag tag, Obj x)
                                   { assert (tag == get_tag (x));
                                     return x >> 2; }
 
 enum          { stack_size = 256*1024 };
-static obj      stack[stack_size];
+static Obj      stack[stack_size];
 static unsigned sp = -1;
 
 #define         TOP               ( stack[sp] )
-static obj      pop  (void)       { return stack[sp--]; }
-static void     push (obj x)      { assert (sp + 1 < stack_size);
+static Obj      pop  (void)       { return stack[sp--]; }
+static void     push (Obj x)      { assert (sp + 1 < stack_size);
                                     stack[++sp] = x; }
 
 enum          { heap_size = 512*1024 };
-static obj      heap[heap_size][2];
+static Obj      heap[heap_size][2];
 static char     marks[heap_size];
 static unsigned hp = 0;
 
-static unsigned heap_index (obj x) { unsigned p = untag (a_pair, x);
+static unsigned heap_index (Obj x) { unsigned p = untag (a_pair, x);
                                      assert (p < heap_size);
                                      return p; }
-static obj  car     (obj x)        { return heap[heap_index (x)][0]; }
-static obj  cdr     (obj x)        { return heap[heap_index (x)][1]; }
-static void set_car (obj x, obj y) { heap[heap_index (x)][0] = y; }
-static void mark (obj x)           { while (get_tag (x) == a_pair
+static Obj  car     (Obj x)        { return heap[heap_index (x)][0]; }
+static Obj  cdr     (Obj x)        { return heap[heap_index (x)][1]; }
+static void set_car (Obj x, Obj y) { heap[heap_index (x)][0] = y; }
+static void mark (Obj x)           { while (get_tag (x) == a_pair
                                             && !marks[heap_index (x)]) {
                                        marks[heap_index (x)] = 1;
                                        mark (car (x));
                                        x = cdr (x); } }
 static void sweep (void)           { while (hp < heap_size && marks[hp])
                                        marks[hp++] = 0; }
-static void gc (obj car, obj cdr)  { unsigned i;
+static void gc (Obj car, Obj cdr)  { unsigned i;
                                      mark (car); mark (cdr);
                                      for (i = 0; i <= sp; ++i)
                                        mark (stack[i]);
                                      hp = 0; }
-static obj cons (obj car, obj cdr) { sweep ();
+static Obj cons (Obj car, Obj cdr) { sweep ();
                                      if (heap_size <= hp) {
                                        gc (car, cdr);
                                        sweep ();
@@ -59,21 +59,21 @@ static obj cons (obj car, obj cdr) { sweep ();
 
 #define     sym_f                 ( stack[var_Df] )
 #define     sym_t                 ( stack[var_Dt] )
-static obj  make_flag (int flag)  { return flag ? sym_t : sym_f; }
+static Obj  make_flag (int flag)  { return flag ? sym_t : sym_f; }
 
 static int read_char (void)       { int c = getchar ();
                                     push (EOF == c ? sym_f : entag (a_char, c));
                                     return c; }
 
 #define DEF(prim) static void prim (void)
-DEF(prim2_eqP)        { obj z = pop (); TOP = make_flag (TOP == z); }
+DEF(prim2_eqP)        { Obj z = pop (); TOP = make_flag (TOP == z); }
 DEF(prim1_nullP)      { TOP = make_flag (nil == TOP); }
 DEF(prim1_charP)      { TOP = make_flag (a_char == get_tag (TOP)); }
 DEF(prim1_pairP)      { TOP = make_flag (a_pair == get_tag (TOP)); }
-DEF(prim2_cons)       { obj z = pop (); TOP = cons (TOP, z); }
+DEF(prim2_cons)       { Obj z = pop (); TOP = cons (TOP, z); }
 DEF(prim1_car)        { TOP = car (TOP); }
 DEF(prim1_cdr)        { TOP = cdr (TOP); }
-DEF(prim2_set_carB)   { obj z = pop (); set_car (TOP, z); TOP = sym_f; }
+DEF(prim2_set_carB)   { Obj z = pop (); set_car (TOP, z); TOP = sym_f; }
 DEF(prim0_read_char)  { (void) read_char (); }
 DEF(prim0_peek_char)  { ungetc (read_char (), stdin); }
 DEF(prim1_write_char) { putchar (untag (a_char, TOP)); TOP = sym_f; }
@@ -10780,8 +10780,7 @@ proc_read_dispatch: {
   if (sym_f != pop ()) {
   push (stack[var_Dquote]);
   run (&&proc_read, sp - 0 + 1);
-  push (nil);
-  prim2_cons ();
+  run (&&proc_list1, sp - 1 + 1);
   prim2_cons ();
   sp -= 1;
   stack[sp] = stack[sp + 1];
