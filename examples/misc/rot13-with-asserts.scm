@@ -3,8 +3,8 @@
 (define linefeed \
  )
 
-(define alphabet "abcdefghijklmnopqrstuvwxyz")
-(define nycunorg "nopqrstuvwxyzabcdefghijklm")
+(define alphabet "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+(define nycunorg "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM")
 
 (define (write-string x)
   (cond ((null? x) 't)

@@ -1,5 +1,5 @@
-(define alphabet "abcdefghijklmnopqrstuvwxyz")
-(define nycunorg "nopqrstuvwxyzabcdefghijklm")
+(define alphabet "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+(define nycunorg "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM")
 
 (define (do-cipher-char x letters rot)
   (cond ((null? letters) x)

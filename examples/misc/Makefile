@@ -3,7 +3,7 @@ SRC = $(wildcard *.scm)
 C=$(SRC:.scm=.c)
 BIN=$(C:.c=)
 
-all:    clean $(BIN)
+all: $(BIN)
 
 %.c: %.scm
 	if ../../ichbins <$^ >$@; then echo "ok!"; else ../../ichbins <$^; fi
