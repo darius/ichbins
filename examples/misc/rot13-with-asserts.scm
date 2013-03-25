@@ -54,9 +54,9 @@
         ((eq? x (car letters)) (car rot))
         (else (do-cipher-char x (cdr letters) (cdr rot)))))
 
-(assert (eq? (do-cipher-char (car "a") "a" "b") (car "b")) "cipher first")
-(assert (eq? (do-cipher-char (car "b") "ab" "cd") (car "d")) "cipher second")
-(assert (eq? (do-cipher-char (car " ") "ab" "cd") (car " ")) "cipher missing")
+(assert (eq? (do-cipher-char \a "a" "b") \b) "cipher first")
+(assert (eq? (do-cipher-char \b "ab" "cd") \d) "cipher second")
+(assert (eq? (do-cipher-char \  "ab" "cd") \ ) "cipher missing")
 
 (define (rot13 x) (do-cipher-char x alphabet nycunorg))
 
