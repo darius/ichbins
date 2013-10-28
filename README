@@ -18,6 +18,8 @@ To compile a program named foo.scm and then run it:
     $ cc foo.c -o foo
     $ ./foo
 
+There's a sketchy overview of the language and system in Overview.text.
+
 To make a change to the compiler and rebuild it, just typing 'make'
 isn't sufficient because of the circular dependency. 'make' will build
 an executable named ichbins2, compiling the current source with the

@@ -1,0 +1,71 @@
+Data types:
+  Rationale:
+    The more data types, the more code.
+  Basic:
+    character
+    ()
+    pair (x . y)
+  Derived:
+    A string is a list of characters.
+    A symbol is a string that happens to be on the intern list.
+    Predicates return one of the symbols t and f.
+    cond checks for f as false, anything else as true.
+
+Lexical syntax:
+  No comments. This starts to show how minimal we're getting.
+  List structure like a subset of Scheme, except:
+  * Case-sensitive symbols
+  * A character literal is written \x
+
+Syntax:
+  program = form*
+  form = (define name expr)
+       | (define (name arg*) expr*)
+       | expr
+  expr = (quote s-expression)
+       | (cond (expr expr*)*)
+       | (symbol expr*)
+       | symbol
+       | other-s-expression
+
+Semantics:
+  The usual Lisp eval, with tail call as jump with arguments.
+  Primitives:
+    eq? 
+    null? char? pair?
+    cons car cdr set-car!
+    write-char read-char peek-char
+    abort
+
+Implementation:
+  Bootstrap interpreter in C.
+    Test driver.
+    (Does the system still run on it?)
+  Compiler in Ichbins.
+    Mechanics:
+      "Standard library"
+        Usual utilities
+        Symbol table -- our one use of assignment.
+        Reader (no s-expression writer)
+      Collect constants, symbols, defs, top-level expressions.
+      Re-express constants as calls to primitives.
+        Re-express refs to them as refs to a new global variable.
+      Turn top-level expressions into a (main) function.
+      Compile functions.
+      Lisp symbols to C identifiers.
+      How do we manage without arithmetic?
+        Punt to the C compiler.
+        Also, bp points to base of stack frame.
+    Runtime system in C incorporated literally as a string.
+      Heap, stack, data representation.
+      Mark-and-lazy-sweep garbage collector.
+      Calls and jumps.
+      System needs t and f symbols at the bottom of the stack.
+      Global variables get pushed after.
+        N.B. it's possible to reference a global before it's defined,
+        with dire consequences -- an unsound implementation in this
+        one respect.
+  Testing and bootstrapping changes.
+  Performance.
+
+Usability, or shortage thereof.
