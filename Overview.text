@@ -46,7 +46,12 @@ Implementation:
       "Standard library"
         Usual utilities
         Symbol table -- our one use of assignment.
+          Explain why we need primitives initially in symbol table.
         Reader (no s-expression writer)
+      Some conventions:
+        e = expression
+        k = the remainder of the compiled code, which we'll cons onto
+        syms = symbol table (a mutable list of symbols)
       Collect constants, symbols, defs, top-level expressions.
       Re-express constants as calls to primitives.
         Re-express refs to them as refs to a new global variable.
@@ -58,6 +63,7 @@ Implementation:
         Also, bp points to base of stack frame.
     Runtime system in C incorporated literally as a string.
       Heap, stack, data representation.
+      Stack-centric code because GC needs to know all the roots.
       Mark-and-lazy-sweep garbage collector.
       Calls and jumps.
       System needs t and f symbols at the bottom of the stack.
@@ -65,7 +71,9 @@ Implementation:
         N.B. it's possible to reference a global before it's defined,
         with dire consequences -- an unsound implementation in this
         one respect.
+      Tracebacks are vaguely useful in gdb.
   Testing and bootstrapping changes.
   Performance.
 
 Usability, or shortage thereof.
+  The overlapping datatypes make errors less immediate.
