@@ -58,7 +58,7 @@ static void traceback (void);
 static void
 traceback_error (const char *plaint)
 {
-  strcpy (output, plaint);
+  if (output != plaint) strcpy (output, plaint);
   out = output + strlen (plaint);
   *out++ = '\n';
   traceback ();
