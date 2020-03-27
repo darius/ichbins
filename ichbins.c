@@ -1,4 +1,4 @@
-  enum { var_Dabort, var_Dwrite_char, var_Dpeek_char, var_Dread_char, var_Dset_carB, var_Dcdr, var_Dcar, var_DcharP, var_DpairP, var_DnullP, var_DeqP, var_Dcond, var_Dcons, var_Dmain, var_Ddefine, var_Dquote, var_Dt, var_Df, var_linefeed, var_primitives, var_symbols_box, var_whitespace_chars, var_non_symbol_chars, var_eof_object, var_c_char_map_domain, var_c_char_map_range, var_c_id_map_domain, var_c_id_map_range, var_prelude_lines, var_postlude_lines };
+  enum { var_Dabort, var_Dwrite_char, var_Dpeek_char, var_Dread_char, var_Dset_carB, var_Dcdr, var_Dcar, var_DcharP, var_DpairP, var_DnullP, var_DeqP, var_Dcond, var_Dcons, var_Dmain, var_Ddefine, var_Dto, var_Dquote, var_Dt, var_Df, var_linefeed, var_primitives, var_symbols_box, var_whitespace_chars, var_non_symbol_chars, var_eof_object, var_c_char_map_domain, var_c_char_map_range, var_c_id_map_domain, var_c_id_map_range, var_prelude_lines, var_postlude_lines };
 
 #include <assert.h>
 #include <stdio.h>
@@ -283,6 +283,12 @@ void run (void **function, int bp) {
   prim2_cons ();
   prim2_cons ();
   assert (var_Ddefine == sp);
+  push (entag (a_char, 't'));
+  push (entag (a_char, 'o'));
+  push (nil);
+  prim2_cons ();
+  prim2_cons ();
+  assert (var_Dto == sp);
   push (entag (a_char, 'q'));
   push (entag (a_char, 'u'));
   push (entag (a_char, 'o'));
@@ -334,9 +340,11 @@ void run (void **function, int bp) {
   push (stack[var_Dt]);
   push (stack[var_Df]);
   push (stack[var_Ddefine]);
+  push (stack[var_Dto]);
   push (stack[var_Dquote]);
   push (stack[var_Dcond]);
   push (nil);
+  prim2_cons ();
   prim2_cons ();
   prim2_cons ();
   prim2_cons ();
@@ -9803,8 +9811,8 @@ proc_compile_seq: {
 }
 
 proc_compile_proc: {
-  enum { arg_syms, arg_name, arg_params, arg_body, arg_k };
-  assert (5 == sp - bp + 1);
+  enum { arg_syms, arg_header, arg_body, arg_k };
+  assert (4 == sp - bp + 1);
   push (nil);
   push (entag (a_char, 'p'));
   push (entag (a_char, 'r'));
@@ -9817,7 +9825,8 @@ proc_compile_proc: {
   prim2_cons ();
   prim2_cons ();
   prim2_cons ();
-  push (stack[bp + arg_name]);
+  push (stack[bp + arg_header]);
+  prim1_car ();
   run (&&proc_c_id, sp - 1 + 1);
   push (entag (a_char, ':'));
   push (entag (a_char, ' '));
@@ -9835,7 +9844,8 @@ proc_compile_proc: {
   prim2_cons ();
   prim2_cons ();
   prim2_cons ();
-  push (stack[bp + arg_params]);
+  push (stack[bp + arg_header]);
+  prim1_cdr ();
   push (entag (a_char, ' '));
   push (entag (a_char, ' '));
   push (entag (a_char, 'a'));
@@ -9857,7 +9867,8 @@ proc_compile_proc: {
   prim2_cons ();
   prim2_cons ();
   prim2_cons ();
-  push (stack[bp + arg_params]);
+  push (stack[bp + arg_header]);
+  prim1_cdr ();
   run (&&proc_length, sp - 1 + 1);
   push (entag (a_char, ' '));
   push (entag (a_char, '='));
@@ -9896,7 +9907,8 @@ proc_compile_proc: {
   prim2_cons ();
   push (stack[bp + arg_syms]);
   push (stack[bp + arg_body]);
-  push (stack[bp + arg_params]);
+  push (stack[bp + arg_header]);
+  prim1_cdr ();
   push (stack[var_Dt]);
   push (entag (a_char, '}'));
   push (nil);
@@ -10019,41 +10031,6 @@ proc_defDname: {
   assert (1 == sp - bp + 1);
   push (stack[bp + arg_def]);
   prim1_cdr ();
-  prim1_car ();
-  sp -= 1;
-  stack[sp] = stack[sp + 1];
-  return;
-}
-
-proc_procDbody: {
-  enum { arg_proc };
-  assert (1 == sp - bp + 1);
-  push (stack[bp + arg_proc]);
-  prim1_cdr ();
-  prim1_cdr ();
-  sp -= 1;
-  stack[sp] = stack[sp + 1];
-  return;
-}
-
-proc_procDparams: {
-  enum { arg_proc };
-  assert (1 == sp - bp + 1);
-  push (stack[bp + arg_proc]);
-  prim1_cdr ();
-  prim1_car ();
-  prim1_cdr ();
-  sp -= 1;
-  stack[sp] = stack[sp + 1];
-  return;
-}
-
-proc_procDname: {
-  enum { arg_proc };
-  assert (1 == sp - bp + 1);
-  push (stack[bp + arg_proc]);
-  prim1_cdr ();
-  prim1_car ();
   prim1_car ();
   sp -= 1;
   stack[sp] = stack[sp + 1];
@@ -10310,65 +10287,60 @@ proc_compile_procs: {
   push (stack[bp + arg_syms]);
   push (stack[var_Dmain]);
   push (nil);
+  prim2_cons ();
   push (stack[bp + arg_exprs]);
   run (&&proc_reverse, sp - 1 + 1);
   push (stack[bp + arg_k]);
-  run (&&proc_compile_proc, sp - 5 + 1);
+  run (&&proc_compile_proc, sp - 4 + 1);
   TAILCALL (proc_do_compile_defs, 3);
   } else {
+  push (stack[var_Df]);
   push (stack[bp + arg_form]);
   prim1_pairP ();
+  prim2_eqP ();
   if (sym_f != pop ()) {
+  push (stack[bp + arg_syms]);
+  run (&&proc_read, sp - 0 + 1);
+  push (stack[bp + arg_var_defs]);
+  push (stack[bp + arg_form]);
+  push (stack[bp + arg_exprs]);
+  prim2_cons ();
+  push (stack[bp + arg_k]);
+  TAILCALL (proc_compile_procs, 5);
+  } else {
   push (stack[var_Ddefine]);
   push (stack[bp + arg_form]);
   prim1_car ();
   prim2_eqP ();
-  } else {
-  push (stack[var_Dt]);
   if (sym_f != pop ()) {
-  push (stack[var_Df]);
+  push (stack[bp + arg_syms]);
+  run (&&proc_read, sp - 0 + 1);
+  push (stack[bp + arg_form]);
+  push (stack[bp + arg_var_defs]);
+  prim2_cons ();
+  push (stack[bp + arg_exprs]);
+  push (stack[bp + arg_k]);
+  TAILCALL (proc_compile_procs, 5);
   } else {
-  push (sym_f);
-  }
-  }
+  push (stack[var_Dto]);
+  push (stack[bp + arg_form]);
+  prim1_car ();
+  prim2_eqP ();
   if (sym_f != pop ()) {
+  push (stack[bp + arg_syms]);
+  run (&&proc_read, sp - 0 + 1);
+  push (stack[bp + arg_var_defs]);
+  push (stack[bp + arg_exprs]);
+  push (stack[bp + arg_syms]);
   push (stack[bp + arg_form]);
   prim1_cdr ();
   prim1_car ();
-  run (&&proc_symbolP, sp - 1 + 1);
-  if (sym_f != pop ()) {
-  push (stack[bp + arg_syms]);
-  run (&&proc_read, sp - 0 + 1);
   push (stack[bp + arg_form]);
-  push (stack[bp + arg_var_defs]);
-  prim2_cons ();
-  push (stack[bp + arg_exprs]);
+  prim1_cdr ();
+  prim1_cdr ();
   push (stack[bp + arg_k]);
+  run (&&proc_compile_proc, sp - 4 + 1);
   TAILCALL (proc_compile_procs, 5);
-  } else {
-  push (stack[var_Dt]);
-  if (sym_f != pop ()) {
-  push (stack[bp + arg_syms]);
-  run (&&proc_read, sp - 0 + 1);
-  push (stack[bp + arg_var_defs]);
-  push (stack[bp + arg_exprs]);
-  push (stack[bp + arg_syms]);
-  push (stack[bp + arg_form]);
-  run (&&proc_procDname, sp - 1 + 1);
-  push (stack[bp + arg_form]);
-  run (&&proc_procDparams, sp - 1 + 1);
-  push (stack[bp + arg_form]);
-  run (&&proc_procDbody, sp - 1 + 1);
-  push (stack[bp + arg_k]);
-  run (&&proc_compile_proc, sp - 5 + 1);
-  TAILCALL (proc_compile_procs, 5);
-  } else {
-  push (sym_f);
-  sp -= 5;
-  stack[sp] = stack[sp + 5];
-  return;
-  }
-  }
   } else {
   push (stack[var_Dt]);
   if (sym_f != pop ()) {
@@ -10385,6 +10357,8 @@ proc_compile_procs: {
   sp -= 5;
   stack[sp] = stack[sp + 5];
   return;
+  }
+  }
   }
   }
   }

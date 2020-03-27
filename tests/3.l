@@ -1,2 +1,2 @@
-(define (f) (write-char \a) (write-char \b))
+(to (f) (write-char \a) (write-char \b))
 (f)

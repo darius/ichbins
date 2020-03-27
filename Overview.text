@@ -20,7 +20,7 @@ Lexical syntax:
 Syntax:
   program = form*
   form = (define name expr)
-       | (define (name arg*) expr*)
+       | (to (name arg*) expr*)
        | expr
   expr = (quote s-expression)
        | (cond (expr expr*)*)
@@ -30,6 +30,7 @@ Syntax:
 
 Semantics:
   The usual Lisp eval, with tail call as jump with arguments.
+  (to (f x) foo) is like Scheme's (define (f x) foo).
   Primitives:
     eq? 
     null? char? pair?
