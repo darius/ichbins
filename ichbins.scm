@@ -180,13 +180,13 @@
 
 (to (compile-def syms name e k)
   (compile-expr syms e '() 'f
-    (emit3 "  assert (var_" (c-id name) " == sp);" k)))
+    (emit3 "  assert(var_" (c-id name) " == sp);" k)))
 
 (to (compile-proc syms header body k)
   (emit1 ""
     (emit3 "proc_" (c-id (car header)) ": {"
       (emit-enum "arg_" (cdr header)
-        (emit3 "  assert (" (length (cdr header)) " == sp - bp + 1);"
+        (emit3 "  assert(" (length (cdr header)) " == sp - bp + 1);"
           (compile-seq syms body (cdr header) 't
             (emit1 "}" k)))))))
 
@@ -203,7 +203,7 @@
 
 (to (compile-expr syms e vars tail? k)
   (cond ((char? e)
-	 (compile-value "entag (a_char, '" (c-char-literal e) "')" vars tail? 
+	 (compile-value "entag(a_char, '" (c-char-literal e) "')" vars tail? 
            k))
 	((null? e) (compile-value "" "nil" "" vars tail? k))
 	((symbol? e)
@@ -214,7 +214,7 @@
 	('t (compile-pair syms (car e) (cdr e) vars tail? k))))
 
 (to (compile-value lit1 lit2 lit3 vars tail? k)
-  (emit5 "  push (" lit1 lit2 lit3 ");"
+  (emit5 "  push(" lit1 lit2 lit3 ");"
     (maybe-return vars tail? k)))
 
 (to (maybe-return vars tail? k)
@@ -233,7 +233,7 @@
 (to (compile-cond syms clauses vars tail? k)
   (cond ((null? clauses) (compile-value "" "sym_f" "" vars tail? k))
 	('t (compile-expr syms (car (car clauses)) vars 'f
-              (emit1 "  if (sym_f != pop ()) {"
+              (emit1 "  if (sym_f != pop()) {"
                 (compile-seq syms (cdr (car clauses)) vars tail?
                   (emit1 "  } else {"
                     (compile-cond syms (cdr clauses) vars tail?
@@ -241,12 +241,12 @@
 
 (to (compile-call rator n-args vars tail? k)
   (cond ((memq? rator primitives)
-	 (emit5 "  prim" n-args "_" (c-id rator) " ();"
+	 (emit5 "  prim" n-args "_" (c-id rator) "();"
            (maybe-return vars tail? k)))
 	(tail?
-         (emit5 "  TAILCALL (proc_" (c-id rator) ", " n-args ");" k))
+         (emit5 "  TAILCALL(proc_" (c-id rator) ", " n-args ");" k))
         ('t
-         (emit5 "  run (&&proc_" (c-id rator) ", sp - " n-args " + 1);" k))))
+         (emit5 "  run(&&proc_" (c-id rator) ", sp - " n-args " + 1);" k))))
 
 (define c-char-map-domain  (list3 linefeed \'     \\))
 (define c-char-map-range   (list3 "\\n"   "\\'" "\\\\"))
@@ -287,11 +287,11 @@
 
 typedef unsigned Obj;
 typedef enum  { a_pair, nil, a_char } Tag;
-static Tag      get_tag (Obj x)   { return 3 & x; }
-static Obj      entag (Tag tag, unsigned value)
+static Tag      get_tag(Obj x)    { return 3 & x; }
+static Obj      entag(Tag tag, unsigned value)
                                   { return tag | (value << 2); }
-static unsigned untag (Tag tag, Obj x)
-                                  { assert (tag == get_tag (x));
+static unsigned untag(Tag tag, Obj x)
+                                  { assert(tag == get_tag(x));
                                     return x >> 2; }
 
 enum          { stack_size = 256*1024 };
@@ -299,8 +299,8 @@ static Obj      stack[stack_size];
 static unsigned sp = -1;
 
 #define         TOP               ( stack[sp] )
-static Obj      pop  (void)       { return stack[sp--]; }
-static void     push (Obj x)      { assert (sp + 1 < stack_size);
+static Obj      pop(void)         { return stack[sp--]; }
+static void     push(Obj x)       { assert(sp + 1 < stack_size);
                                     stack[++sp] = x; }
 
 enum          { heap_size = 512*1024 };
@@ -308,70 +308,70 @@ static Obj      heap[heap_size][2];
 static char     marks[heap_size];
 static unsigned hp = 0;
 
-static unsigned heap_index (Obj x) { unsigned p = untag (a_pair, x);
-                                     assert (p < heap_size);
+static unsigned heap_index(Obj x) { unsigned p = untag(a_pair, x);
+                                     assert(p < heap_size);
                                      return p; }
-static Obj  car     (Obj x)        { return heap[heap_index (x)][0]; }
-static Obj  cdr     (Obj x)        { return heap[heap_index (x)][1]; }
-static void set_car (Obj x, Obj y) { heap[heap_index (x)][0] = y; }
-static void mark (Obj x)           { while (get_tag (x) == a_pair
-                                            && !marks[heap_index (x)]) {
-                                       marks[heap_index (x)] = 1;
-                                       mark (car (x));
-                                       x = cdr (x); } }
-static void sweep (void)           { while (hp < heap_size && marks[hp])
-                                       marks[hp++] = 0; }
-static void gc (Obj car, Obj cdr)  { unsigned i;
-                                     mark (car); mark (cdr);
-                                     for (i = 0; i <= sp; ++i)
-                                       mark (stack[i]);
-                                     hp = 0; }
-static Obj cons (Obj car, Obj cdr) { sweep ();
-                                     if (heap_size <= hp) {
-                                       gc (car, cdr);
-                                       sweep ();
-                                       if (heap_size <= hp) {
-                                         fprintf (stderr, \"Heap full\\n\");
-                                         exit (1); } }
-                                     heap[hp][0] = car;
-                                     heap[hp][1] = cdr;
-                                     return entag (a_pair, hp++); }
+static Obj  car    (Obj x)        { return heap[heap_index(x)][0]; }
+static Obj  cdr    (Obj x)        { return heap[heap_index(x)][1]; }
+static void set_car(Obj x, Obj y) { heap[heap_index(x)][0] = y; }
+static void mark(Obj x)           { while (get_tag(x) == a_pair
+                                           && !marks[heap_index(x)]) {
+                                      marks[heap_index(x)] = 1;
+                                      mark(car(x));
+                                      x = cdr(x); } }
+static void sweep(void)           { while (hp < heap_size && marks[hp])
+                                      marks[hp++] = 0; }
+static void gc(Obj car, Obj cdr)  { unsigned i;
+                                    mark(car); mark(cdr);
+                                    for (i = 0; i <= sp; ++i)
+                                      mark(stack[i]);
+                                    hp = 0; }
+static Obj cons(Obj car, Obj cdr) { sweep();
+                                    if (heap_size <= hp) {
+                                      gc(car, cdr);
+                                      sweep();
+                                      if (heap_size <= hp) {
+                                        fprintf(stderr, \"Heap full\\n\");
+                                        exit(1); } }
+                                    heap[hp][0] = car;
+                                    heap[hp][1] = cdr;
+                                    return entag(a_pair, hp++); }
 
-#define     sym_f                 ( stack[var_Df] )
-#define     sym_t                 ( stack[var_Dt] )
-static Obj  make_flag (int flag)  { return flag ? sym_t : sym_f; }
+#define     sym_f                ( stack[var_Df] )
+#define     sym_t                ( stack[var_Dt] )
+static Obj  make_flag(int flag)  { return flag ? sym_t : sym_f; }
 
-static int read_char (void)       { int c = getchar ();
-                                    push (EOF == c ? sym_f : entag (a_char, c));
-                                    return c; }
+static int read_char(void)       { int c = getchar();
+                                   push(EOF == c ? sym_f : entag(a_char, c));
+                                   return c; }
 
-#define DEF(prim) static void prim (void)
-DEF(prim2_eqP)        { Obj z = pop (); TOP = make_flag (TOP == z); }
-DEF(prim1_nullP)      { TOP = make_flag (nil == TOP); }
-DEF(prim1_charP)      { TOP = make_flag (a_char == get_tag (TOP)); }
-DEF(prim1_pairP)      { TOP = make_flag (a_pair == get_tag (TOP)); }
-DEF(prim2_cons)       { Obj z = pop (); TOP = cons (TOP, z); }
-DEF(prim1_car)        { TOP = car (TOP); }
-DEF(prim1_cdr)        { TOP = cdr (TOP); }
-DEF(prim2_set_carB)   { Obj z = pop (); set_car (TOP, z); TOP = sym_f; }
-DEF(prim0_read_char)  { (void) read_char (); }
-DEF(prim0_peek_char)  { ungetc (read_char (), stdin); }
-DEF(prim1_write_char) { putchar (untag (a_char, TOP)); TOP = sym_f; }
-DEF(prim0_abort)      { exit (1); }
+#define DEF(prim) static void prim(void)
+DEF(prim2_eqP)        { Obj z = pop(); TOP = make_flag(TOP == z); }
+DEF(prim1_nullP)      { TOP = make_flag(nil == TOP); }
+DEF(prim1_charP)      { TOP = make_flag(a_char == get_tag(TOP)); }
+DEF(prim1_pairP)      { TOP = make_flag(a_pair == get_tag(TOP)); }
+DEF(prim2_cons)       { Obj z = pop(); TOP = cons(TOP, z); }
+DEF(prim1_car)        { TOP = car(TOP); }
+DEF(prim1_cdr)        { TOP = cdr(TOP); }
+DEF(prim2_set_carB)   { Obj z = pop(); set_car(TOP, z); TOP = sym_f; }
+DEF(prim0_read_char)  { (void) read_char(); }
+DEF(prim0_peek_char)  { ungetc(read_char(), stdin); }
+DEF(prim1_write_char) { putchar(untag(a_char, TOP)); TOP = sym_f; }
+DEF(prim0_abort)      { exit(1); }
 
 #define TAILCALL(label, nargs) do {                                           \\
-    memmove (stack + bp, stack + sp - (nargs) + 1, (nargs) * sizeof stack[0]);\\
+    memmove(stack + bp, stack + sp - (nargs) + 1, (nargs) * sizeof stack[0]); \\
     sp = bp + (nargs) - 1;                                                    \\
     goto label;                                                               \\
   } while (0)
 
-void run (void **function, int bp) {
+void run(void **function, int bp) {
   if (function) goto *function;")
 
 (define postlude-lines
 "}
 
-int main () { run (NULL, 0); return 0; }
+int main() { run(NULL, 0); return 0; }
 ")
 
 (compile)
