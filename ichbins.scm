@@ -14,11 +14,11 @@
         ('t (cons (car xs) (append (cdr xs) ys)))))
 
 (to (reverse xs)
-  (revappend xs '()))
+  (append-reverse xs '()))
 
-(to (revappend xs ys)
+(to (append-reverse xs ys)
   (cond ((null? xs) ys)
-	('t (revappend (cdr xs) (cons (car xs) ys)))))
+	('t (append-reverse (cdr xs) (cons (car xs) ys)))))
 
 (to (memq? x xs)
   (cond ((null? xs) 'f)
@@ -115,9 +115,9 @@
 	('t (cons (read-dispatch c) (read-list)))))
 
 
-(to (push1         z k) (append z (cons linefeed k)))
-(to (push3     x y z k) (append x (append y (push1 z k))))
-(to (push5 v w x y z k) (append v (append w (push3 x y z k))))
+(to (emit1         z k) (append z (cons linefeed k)))
+(to (emit3     x y z k) (append x (append y (emit1 z k))))
+(to (emit5 v w x y z k) (append v (append w (emit3 x y z k))))
 
 
 (to (compile)
@@ -139,12 +139,12 @@
 (to (do-compile-defs syms var-defs k)
   (compile-symbols syms var-defs
     (compile-defs syms var-defs
-      (push1 "  bp = sp + 1; goto proc_main;" k))))
+      (emit1 "  bp = sp + 1; goto proc_main;" k))))
 
 (to (compile-symbols syms var-defs k)
-  (push-enum "var_" (append (map-def.name (make-symbol-defs (car syms)))
+  (emit-enum "var_" (append (map-def.name (make-symbol-defs (car syms)))
                             (map-def.name var-defs))
-    (push1 prelude-lines
+    (emit1 prelude-lines
       (compile-defs syms (make-symbol-defs (car syms)) k))))
 
 (to (compile-defs syms defs k)
@@ -180,20 +180,20 @@
 
 (to (compile-def syms name e k)
   (compile-expr syms e '() 'f
-    (push3 "  assert (var_" (c-id name) " == sp);" k)))
+    (emit3 "  assert (var_" (c-id name) " == sp);" k)))
 
 (to (compile-proc syms header body k)
-  (push1 ""
-    (push3 "proc_" (c-id (car header)) ": {"
-      (push-enum "arg_" (cdr header)
-        (push3 "  assert (" (length (cdr header)) " == sp - bp + 1);"
+  (emit1 ""
+    (emit3 "proc_" (c-id (car header)) ": {"
+      (emit-enum "arg_" (cdr header)
+        (emit3 "  assert (" (length (cdr header)) " == sp - bp + 1);"
           (compile-seq syms body (cdr header) 't
-            (push1 "}" k)))))))
+            (emit1 "}" k)))))))
 
 (to (compile-seq syms es vars tail? k)
   (cond ((null? (cdr es)) (compile-expr syms (car es) vars tail? k))
 	('t (compile-expr syms (car es) vars 'f
-              (push1 "  --sp;"
+              (emit1 "  --sp;"
                 (compile-seq syms (cdr es) vars tail? k))))))
 
 (to (compile-exprs syms es vars k)
@@ -214,13 +214,13 @@
 	('t (compile-pair syms (car e) (cdr e) vars tail? k))))
 
 (to (compile-value lit1 lit2 lit3 vars tail? k)
-  (push5 "  push (" lit1 lit2 lit3 ");"
+  (emit5 "  push (" lit1 lit2 lit3 ");"
     (maybe-return vars tail? k)))
 
 (to (maybe-return vars tail? k)
-  (cond (tail? (push3 "  sp -= " (length vars) ";"
-                 (push3 "  stack[sp] = stack[sp + " (length vars) "];"
-                   (push1 "  return;" k))))
+  (cond (tail? (emit3 "  sp -= " (length vars) ";"
+                 (emit3 "  stack[sp] = stack[sp + " (length vars) "];"
+                   (emit1 "  return;" k))))
         ('t k)))
 
 (to (compile-pair syms rator rands vars tail? k)
@@ -233,20 +233,20 @@
 (to (compile-cond syms clauses vars tail? k)
   (cond ((null? clauses) (compile-value "" "sym_f" "" vars tail? k))
 	('t (compile-expr syms (car (car clauses)) vars 'f
-              (push1 "  if (sym_f != pop ()) {"
+              (emit1 "  if (sym_f != pop ()) {"
                 (compile-seq syms (cdr (car clauses)) vars tail?
-                  (push1 "  } else {"
+                  (emit1 "  } else {"
                     (compile-cond syms (cdr clauses) vars tail?
-                      (push1 "  }" k)))))))))
+                      (emit1 "  }" k)))))))))
 
 (to (compile-call rator n-args vars tail? k)
   (cond ((memq? rator primitives)
-	 (push5 "  prim" n-args "_" (c-id rator) " ();"
+	 (emit5 "  prim" n-args "_" (c-id rator) " ();"
            (maybe-return vars tail? k)))
 	(tail?
-         (push5 "  TAILCALL (proc_" (c-id rator) ", " n-args ");" k))
+         (emit5 "  TAILCALL (proc_" (c-id rator) ", " n-args ");" k))
         ('t
-         (push5 "  run (&&proc_" (c-id rator) ", sp - " n-args " + 1);" k))))
+         (emit5 "  run (&&proc_" (c-id rator) ", sp - " n-args " + 1);" k))))
 
 (define c-char-map-domain  (list3 linefeed \'     \\))
 (define c-char-map-range   (list3 "\\n"   "\\'" "\\\\"))
@@ -266,9 +266,9 @@
         ((eq? x (car domain)) (car range))
         ('t (translit x default (cdr domain) (cdr range)))))
 
-(to (push-enum prefix names k)
+(to (emit-enum prefix names k)
   (cond ((null? names) k)
-        ('t (append "  enum {" (comma prefix names (push1 " };" k))))))
+        ('t (append "  enum {" (comma prefix names (emit1 " };" k))))))
 
 (to (comma prefix names k)
   (cond ((null? names) k)
