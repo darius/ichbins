@@ -309,8 +309,8 @@ static char     marks[heap_size];
 static unsigned hp = 0;
 
 static unsigned heap_index(Obj x) { unsigned p = untag(a_pair, x);
-                                     assert(p < heap_size);
-                                     return p; }
+                                    assert(p < heap_size);
+                                    return p; }
 static Obj  car    (Obj x)        { return heap[heap_index(x)][0]; }
 static Obj  cdr    (Obj x)        { return heap[heap_index(x)][1]; }
 static void set_car(Obj x, Obj y) { heap[heap_index(x)][0] = y; }
@@ -319,7 +319,7 @@ static void mark(Obj x)           { while (get_tag(x) == a_pair
                                       marks[heap_index(x)] = 1;
                                       mark(car(x));
                                       x = cdr(x); } }
-static int sweep(void)            { while (hp < heap_size && marks[hp])
+static int  sweep(void)           { while (hp < heap_size && marks[hp])
                                       marks[hp++] = 0;
                                     return hp < heap_size; }
 static void gc(Obj car, Obj cdr)  { unsigned i;
@@ -336,13 +336,13 @@ static Obj cons(Obj car, Obj cdr) { if (!sweep()) {
                                     heap[hp][1] = cdr;
                                     return entag(a_pair, hp++); }
 
-#define     sym_f                ( stack[var_Df] )
-#define     sym_t                ( stack[var_Dt] )
-static Obj  make_flag(int flag)  { return flag ? sym_t : sym_f; }
+#define     sym_f                 ( stack[var_Df] )
+#define     sym_t                 ( stack[var_Dt] )
+static Obj  make_flag(int flag)   { return flag ? sym_t : sym_f; }
 
-static int read_char(void)       { int c = getchar();
-                                   push(EOF == c ? sym_f : entag(a_char, c));
-                                   return c; }
+static int  read_char(void)       { int c = getchar();
+                                    push(EOF == c ? sym_f : entag(a_char, c));
+                                    return c; }
 
 #define DEF(prim) static void prim(void)
 DEF(prim2_eqP)        { Obj z = pop(); TOP = make_flag(TOP == z); }

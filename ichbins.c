@@ -56,13 +56,13 @@ static Obj cons(Obj car, Obj cdr) { if (!sweep()) {
                                     heap[hp][1] = cdr;
                                     return entag(a_pair, hp++); }
 
-#define     sym_f                ( stack[var_Df] )
-#define     sym_t                ( stack[var_Dt] )
-static Obj  make_flag(int flag)  { return flag ? sym_t : sym_f; }
+#define     sym_f                 ( stack[var_Df] )
+#define     sym_t                 ( stack[var_Dt] )
+static Obj  make_flag(int flag)   { return flag ? sym_t : sym_f; }
 
-static int  read_char(void)      { int c = getchar();
-                                   push(EOF == c ? sym_f : entag(a_char, c));
-                                   return c; }
+static int  read_char(void)       { int c = getchar();
+                                    push(EOF == c ? sym_f : entag(a_char, c));
+                                    return c; }
 
 #define DEF(prim) static void prim(void)
 DEF(prim2_eqP)        { Obj z = pop(); TOP = make_flag(TOP == z); }
