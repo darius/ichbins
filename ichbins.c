@@ -39,7 +39,7 @@ static void mark(Obj x)           { while (get_tag(x) == a_pair
                                       marks[heap_index(x)] = 1;
                                       mark(car(x));
                                       x = cdr(x); } }
-static int sweep(void)            { while (hp < heap_size && marks[hp])
+static int  sweep(void)           { while (hp < heap_size && marks[hp])
                                       marks[hp++] = 0;
                                     return hp < heap_size; }
 static void gc(Obj car, Obj cdr)  { unsigned i;
@@ -60,7 +60,7 @@ static Obj cons(Obj car, Obj cdr) { if (!sweep()) {
 #define     sym_t                ( stack[var_Dt] )
 static Obj  make_flag(int flag)  { return flag ? sym_t : sym_f; }
 
-static int read_char(void)       { int c = getchar();
+static int  read_char(void)      { int c = getchar();
                                    push(EOF == c ? sym_f : entag(a_char, c));
                                    return c; }
 
