@@ -319,18 +319,17 @@ static void mark(Obj x)           { while (get_tag(x) == a_pair
                                       marks[heap_index(x)] = 1;
                                       mark(car(x));
                                       x = cdr(x); } }
-static void sweep(void)           { while (hp < heap_size && marks[hp])
-                                      marks[hp++] = 0; }
+static int sweep(void)            { while (hp < heap_size && marks[hp])
+                                      marks[hp++] = 0;
+                                    return hp < heap_size; }
 static void gc(Obj car, Obj cdr)  { unsigned i;
                                     mark(car); mark(cdr);
                                     for (i = 0; i <= sp; ++i)
                                       mark(stack[i]);
                                     hp = 0; }
-static Obj cons(Obj car, Obj cdr) { sweep();
-                                    if (heap_size <= hp) {
+static Obj cons(Obj car, Obj cdr) { if (!sweep()) {
                                       gc(car, cdr);
-                                      sweep();
-                                      if (heap_size <= hp) {
+                                      if (!sweep()) {
                                         fprintf(stderr, \"Heap full\\n\");
                                         exit(1); } }
                                     heap[hp][0] = car;
