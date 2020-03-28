@@ -29,8 +29,8 @@ static char     marks[heap_size];
 static unsigned hp = 0;
 
 static unsigned heap_index(Obj x) { unsigned p = untag(a_pair, x);
-                                     assert(p < heap_size);
-                                     return p; }
+                                    assert(p < heap_size);
+                                    return p; }
 static Obj  car    (Obj x)        { return heap[heap_index(x)][0]; }
 static Obj  cdr    (Obj x)        { return heap[heap_index(x)][1]; }
 static void set_car(Obj x, Obj y) { heap[heap_index(x)][0] = y; }
