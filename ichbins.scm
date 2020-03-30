@@ -121,22 +121,22 @@
 
 
 (to (compile)
-  (write-string (compile-procs '((t f)) (read) '() '() postlude-lines)))
+  (write-string (read-compile-loop '((t f)) (read) '() '() postlude-lines)))
 
-(to (compile-procs syms form var-defs exprs k)
+(to (read-compile-loop syms form var-defs exprs k)
   (cond ((eq? eof-object form)
-         (do-compile-defs syms (reverse var-defs)
+         (compile-startup syms (reverse var-defs)
            (compile-proc syms '(main) (reverse exprs) k)))
-        ((eq? 'f (pair? form))
-         (compile-procs syms (read) var-defs (cons form exprs) k))
-        ((eq? 'define (car form))
-         (compile-procs syms (read) (cons form var-defs) exprs k))
-        ((eq? 'to (car form))
-         (compile-procs syms (read) var-defs exprs
-           (compile-proc syms (car (cdr form)) (cdr (cdr form)) k)))
-        ('t (compile-procs syms (read) var-defs (cons form exprs) k))))
+        ((pair? form)
+         (cond ((eq? 'define (car form))
+                (read-compile-loop syms (read) (cons form var-defs) exprs k))
+               ((eq? 'to (car form))
+                (read-compile-loop syms (read) var-defs exprs
+                  (compile-proc syms (car (cdr form)) (cdr (cdr form)) k)))
+               ('t (read-compile-loop syms (read) var-defs (cons form exprs) k))))
+        ('t (read-compile-loop syms (read) var-defs (cons form exprs) k))))
 
-(to (do-compile-defs syms var-defs k)
+(to (compile-startup syms var-defs k)
   (compile-symbols syms var-defs
     (compile-defs syms var-defs
       (emit1 "  bp = sp + 1; goto proc_main;" k))))
@@ -148,10 +148,9 @@
       (compile-defs syms (make-symbol-defs (car syms)) k))))
 
 (to (compile-defs syms defs k)
-  (cond ((pair? defs)
-	 (compile-def syms (def.name (car defs)) (def.expr (car defs))
-           (compile-defs syms (cdr defs) k)))
-        ('t k)))
+  (cond ((null? defs) k)
+        ('t (compile-def syms (def.name (car defs)) (def.expr (car defs))
+              (compile-defs syms (cdr defs) k)))))
 
 (to (express syms x)
   (cond ((symbol? x) (adjoin! x syms) (symbol->var x))
