@@ -29,8 +29,8 @@ static char     marks[heap_size];
 static unsigned hp = 0;
 
 static unsigned heap_index(Obj x) { unsigned p = untag(a_pair, x);
-                                    assert(p < heap_size);
-                                    return p; }
+                                     assert(p < heap_size);
+                                     return p; }
 static Obj  car    (Obj x)        { return heap[heap_index(x)][0]; }
 static Obj  cdr    (Obj x)        { return heap[heap_index(x)][1]; }
 static void set_car(Obj x, Obj y) { heap[heap_index(x)][0] = y; }
@@ -39,7 +39,7 @@ static void mark(Obj x)           { while (get_tag(x) == a_pair
                                       marks[heap_index(x)] = 1;
                                       mark(car(x));
                                       x = cdr(x); } }
-static int  sweep(void)           { while (hp < heap_size && marks[hp])
+static int sweep(void)            { while (hp < heap_size && marks[hp])
                                       marks[hp++] = 0;
                                     return hp < heap_size; }
 static void gc(Obj car, Obj cdr)  { unsigned i;
@@ -56,13 +56,13 @@ static Obj cons(Obj car, Obj cdr) { if (!sweep()) {
                                     heap[hp][1] = cdr;
                                     return entag(a_pair, hp++); }
 
-#define     sym_f                 ( stack[var_Df] )
-#define     sym_t                 ( stack[var_Dt] )
-static Obj  make_flag(int flag)   { return flag ? sym_t : sym_f; }
+#define     sym_f                ( stack[var_Df] )
+#define     sym_t                ( stack[var_Dt] )
+static Obj  make_flag(int flag)  { return flag ? sym_t : sym_f; }
 
-static int  read_char(void)       { int c = getchar();
-                                    push(EOF == c ? sym_f : entag(a_char, c));
-                                    return c; }
+static int read_char(void)       { int c = getchar();
+                                   push(EOF == c ? sym_f : entag(a_char, c));
+                                   return c; }
 
 #define DEF(prim) static void prim(void)
 DEF(prim2_eqP)        { Obj z = pop(); TOP = make_flag(TOP == z); }
@@ -1485,7 +1485,6 @@ void run(void **function, int bp) {
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
-  push(entag(a_char, ' '));
   push(entag(a_char, 'a'));
   push(entag(a_char, 's'));
   push(entag(a_char, 's'));
@@ -1509,7 +1508,6 @@ void run(void **function, int bp) {
   push(entag(a_char, ')'));
   push(entag(a_char, ';'));
   push(entag(a_char, '\n'));
-  push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
@@ -2078,6 +2076,7 @@ void run(void **function, int bp) {
   push(entag(a_char, 'n'));
   push(entag(a_char, 't'));
   push(entag(a_char, ' '));
+  push(entag(a_char, ' '));
   push(entag(a_char, 's'));
   push(entag(a_char, 'w'));
   push(entag(a_char, 'e'));
@@ -2089,7 +2088,6 @@ void run(void **function, int bp) {
   push(entag(a_char, 'i'));
   push(entag(a_char, 'd'));
   push(entag(a_char, ')'));
-  push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
@@ -3016,6 +3014,7 @@ void run(void **function, int bp) {
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
+  push(entag(a_char, ' '));
   push(entag(a_char, '('));
   push(entag(a_char, ' '));
   push(entag(a_char, 's'));
@@ -3051,6 +3050,7 @@ void run(void **function, int bp) {
   push(entag(a_char, 'm'));
   push(entag(a_char, '_'));
   push(entag(a_char, 't'));
+  push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
@@ -3118,6 +3118,7 @@ void run(void **function, int bp) {
   push(entag(a_char, ')'));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
+  push(entag(a_char, ' '));
   push(entag(a_char, '{'));
   push(entag(a_char, ' '));
   push(entag(a_char, 'r'));
@@ -3162,6 +3163,7 @@ void run(void **function, int bp) {
   push(entag(a_char, 'i'));
   push(entag(a_char, 'n'));
   push(entag(a_char, 't'));
+  push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, 'r'));
   push(entag(a_char, 'e'));
@@ -3241,6 +3243,7 @@ void run(void **function, int bp) {
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
+  push(entag(a_char, ' '));
   push(entag(a_char, 'p'));
   push(entag(a_char, 'u'));
   push(entag(a_char, 's'));
@@ -3284,6 +3287,7 @@ void run(void **function, int bp) {
   push(entag(a_char, ')'));
   push(entag(a_char, ';'));
   push(entag(a_char, '\n'));
+  push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
   push(entag(a_char, ' '));
@@ -4453,6 +4457,10 @@ void run(void **function, int bp) {
   push(entag(a_char, 'n'));
   push(entag(a_char, ';'));
   push(nil);
+  prim2_cons();
+  prim2_cons();
+  prim2_cons();
+  prim2_cons();
   prim2_cons();
   prim2_cons();
   prim2_cons();
@@ -9862,7 +9870,14 @@ proc_compile_defs: {
   enum { arg_syms, arg_defs, arg_k };
   assert(3 == sp - bp + 1);
   push(stack[bp + arg_defs]);
-  prim1_pairP();
+  prim1_nullP();
+  if (sym_f != pop()) {
+  push(stack[bp + arg_k]);
+  sp -= 3;
+  stack[sp] = stack[sp + 3];
+  return;
+  } else {
+  push(stack[var_Dt]);
   if (sym_f != pop()) {
   push(stack[bp + arg_syms]);
   push(stack[bp + arg_defs]);
@@ -9877,13 +9892,6 @@ proc_compile_defs: {
   push(stack[bp + arg_k]);
   run(&&proc_compile_defs, sp - 3 + 1);
   TAILCALL(proc_compile_def, 4);
-  } else {
-  push(stack[var_Dt]);
-  if (sym_f != pop()) {
-  push(stack[bp + arg_k]);
-  sp -= 3;
-  stack[sp] = stack[sp + 3];
-  return;
   } else {
   push(sym_f);
   sp -= 3;
@@ -9923,7 +9931,7 @@ proc_compile_symbols: {
   TAILCALL(proc_emit_enum, 3);
 }
 
-proc_do_compile_defs: {
+proc_compile_startup: {
   enum { arg_syms, arg_var_defs, arg_k };
   assert(3 == sp - bp + 1);
   push(stack[bp + arg_syms]);
@@ -9997,7 +10005,7 @@ proc_do_compile_defs: {
   TAILCALL(proc_compile_symbols, 3);
 }
 
-proc_compile_procs: {
+proc_read_compile_loop: {
   enum { arg_syms, arg_form, arg_var_defs, arg_exprs, arg_k };
   assert(5 == sp - bp + 1);
   push(stack[var_eof_object]);
@@ -10015,22 +10023,11 @@ proc_compile_procs: {
   run(&&proc_reverse, sp - 1 + 1);
   push(stack[bp + arg_k]);
   run(&&proc_compile_proc, sp - 4 + 1);
-  TAILCALL(proc_do_compile_defs, 3);
+  TAILCALL(proc_compile_startup, 3);
   } else {
-  push(stack[var_Df]);
   push(stack[bp + arg_form]);
   prim1_pairP();
-  prim2_eqP();
   if (sym_f != pop()) {
-  push(stack[bp + arg_syms]);
-  run(&&proc_read, sp - 0 + 1);
-  push(stack[bp + arg_var_defs]);
-  push(stack[bp + arg_form]);
-  push(stack[bp + arg_exprs]);
-  prim2_cons();
-  push(stack[bp + arg_k]);
-  TAILCALL(proc_compile_procs, 5);
-  } else {
   push(stack[var_Ddefine]);
   push(stack[bp + arg_form]);
   prim1_car();
@@ -10043,7 +10040,7 @@ proc_compile_procs: {
   prim2_cons();
   push(stack[bp + arg_exprs]);
   push(stack[bp + arg_k]);
-  TAILCALL(proc_compile_procs, 5);
+  TAILCALL(proc_read_compile_loop, 5);
   } else {
   push(stack[var_Dto]);
   push(stack[bp + arg_form]);
@@ -10063,7 +10060,7 @@ proc_compile_procs: {
   prim1_cdr();
   push(stack[bp + arg_k]);
   run(&&proc_compile_proc, sp - 4 + 1);
-  TAILCALL(proc_compile_procs, 5);
+  TAILCALL(proc_read_compile_loop, 5);
   } else {
   push(stack[var_Dt]);
   if (sym_f != pop()) {
@@ -10074,7 +10071,7 @@ proc_compile_procs: {
   push(stack[bp + arg_exprs]);
   prim2_cons();
   push(stack[bp + arg_k]);
-  TAILCALL(proc_compile_procs, 5);
+  TAILCALL(proc_read_compile_loop, 5);
   } else {
   push(sym_f);
   sp -= 5;
@@ -10082,6 +10079,23 @@ proc_compile_procs: {
   return;
   }
   }
+  }
+  } else {
+  push(stack[var_Dt]);
+  if (sym_f != pop()) {
+  push(stack[bp + arg_syms]);
+  run(&&proc_read, sp - 0 + 1);
+  push(stack[bp + arg_var_defs]);
+  push(stack[bp + arg_form]);
+  push(stack[bp + arg_exprs]);
+  prim2_cons();
+  push(stack[bp + arg_k]);
+  TAILCALL(proc_read_compile_loop, 5);
+  } else {
+  push(sym_f);
+  sp -= 5;
+  stack[sp] = stack[sp + 5];
+  return;
   }
   }
   }
@@ -10100,7 +10114,7 @@ proc_compile: {
   push(nil);
   push(nil);
   push(stack[var_postlude_lines]);
-  run(&&proc_compile_procs, sp - 5 + 1);
+  run(&&proc_read_compile_loop, sp - 5 + 1);
   TAILCALL(proc_write_string, 1);
 }
 
