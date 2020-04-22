@@ -127,11 +127,11 @@
 - 'hello 'world
 = hello~world
 
-- (define (list x) (cons x '()))
+- (to (list x) (cons x '()))
   (list 'foo)
 = (foo)
 
-- (define (append x y)
+- (to (append x y)
     (cond ((null? x) y)
           ('t (cons (car x) (append (cdr x) y)))))
   (append '(a b c) '(x y z))
@@ -161,13 +161,13 @@
 ;= ("*eof*")
 ; So, here's a more complicated pair of tests of eof-ness:
 
-- (define (f) (g (read-char)))
-  (define (g c) (read-char))
+- (to (f) (g (read-char)))
+  (to (g c) (read-char))
   (f)
 = f
 
-- (define (f) (g (read-char)))
-  (define (g c) (peek-char))
+- (to (f) (g (read-char)))
+  (to (g c) (peek-char))
   (f)
 = f
 
@@ -177,11 +177,11 @@
 - (cond ('t (write-char \a) (write-char \b)))
 = abf
 
-- (define (f) (write-char \a) (write-char \b))
+- (to (f) (write-char \a) (write-char \b))
   (f)
 = abf
 
-- (define (string? x)
+- (to (string? x)
     (cond ((null? x) 't)
           ((char? x) 'f)
           ((char? (car x)) (string? (cdr x)))
@@ -196,28 +196,28 @@
 ; Symbols
 ; N.B. generally for speed symbol? should first check stringness
 
-- (define (string=? s t)
+- (to (string=? s t)
     (cond ((null? s) (null? t))
           ((eq? (car s) (car t)) (string=? (cdr s) (cdr t)))
           ('t 'f)))
 
-  (define (memq? x xs)
+  (to (memq? x xs)
     (cond ((null? xs) 'f)
           ((eq? x (car xs)) 't)
           ('t (memq? x (cdr xs)))))
 
-  (define (cons! x xs-cell)
+  (to (cons! x xs-cell)
     (set-car! xs-cell (cons x (car xs-cell))))
 
   (define symbols '((f)))
 
-  (define (symbol? x)
+  (to (symbol? x)
     (memq? x (car symbols)))
 
-  (define (intern s) 
+  (to (intern s) 
     (intern-lookup s (car symbols)))
 
-  (define (intern-lookup s syms)
+  (to (intern-lookup s syms)
     (cond ((null? syms) (cons! s symbols) s)
           ((string=? s (car syms)) (car syms))
           ('t (intern-lookup s (cdr syms)))))
@@ -233,39 +233,39 @@
 
 ; Writing 
 
-- (define (string? x)
+- (to (string? x)
     (cond ((null? x) 't)
           ((char? x) 'f)
           ((char? (car x)) (string? (cdr x)))
           ('t 'f)))
 
-  (define (string=? s t)
+  (to (string=? s t)
     (cond ((null? s) (null? t))
           ((eq? (car s) (car t)) (string=? (cdr s) (cdr t)))
           ('t 'f)))
 
-  (define (memq? x xs)
+  (to (memq? x xs)
     (cond ((null? xs) 'f)
           ((eq? x (car xs)) 't)
           ('t (memq? x (cdr xs)))))
 
-  (define (cons! x xs-cell)
+  (to (cons! x xs-cell)
     (set-car! xs-cell (cons x (car xs-cell))))
 
   (define symbols '((f)))
 
-  (define (symbol? x)
+  (to (symbol? x)
     (memq? x (car symbols)))
 
-  (define (intern s) 
+  (to (intern s) 
     (intern-lookup s (car symbols)))
 
-  (define (intern-lookup s syms)
+  (to (intern-lookup s syms)
     (cond ((null? syms) (cons! s symbols) s)
           ((string=? s (car syms)) (car syms))
           ('t (intern-lookup s (cdr syms)))))
 
-  (define (write x)
+  (to (write x)
     (cond ((null? x) (write-string '"()"))
           ((char? x) (write-char \\) (write-char x))
           ((string? x)
@@ -276,13 +276,13 @@
               (write-each (cdr x))
               (write-char \)))))
 
-  (define (write-each xs)
+  (to (write-each xs)
     (cond ((null? xs))
           ('t (write-char \ )
               (write (car xs))
               (write-each (cdr xs)))))
 
-  (define (write-string chars)
+  (to (write-string chars)
     (cond ((null? chars))
           ('t (write-char (car chars))
               (write-string (cdr chars)))))
@@ -297,43 +297,43 @@
 
 ; Reading
 
-- (define (string=? s t)
+- (to (string=? s t)
     (cond ((null? s) (null? t))
           ((eq? (car s) (car t)) (string=? (cdr s) (cdr t)))
           ('t 'f)))
 
-  (define (memq? x xs)
+  (to (memq? x xs)
     (cond ((null? xs) 'f)
           ((eq? x (car xs)) 't)
           ('t (memq? x (cdr xs)))))
 
-  (define (cons! x xs-cell)
+  (to (cons! x xs-cell)
     (set-car! xs-cell (cons x (car xs-cell))))
 
   (define symbols '((f)))
 
-  (define (symbol? x)
+  (to (symbol? x)
     (memq? x (car symbols)))
 
-  (define (intern s) 
+  (to (intern s) 
     (intern-lookup s (car symbols)))
 
-  (define (intern-lookup s syms)
+  (to (intern-lookup s syms)
     (cond ((null? syms) (cons! s symbols) s)
           ((string=? s (car syms)) (car syms))
           ('t (intern-lookup s (cdr syms)))))
 
-  (define (read)
+  (to (read)
     (skip-blanks (peek-char))
     (read-dispatch (read-char)))
 
-  (define (skip-blanks c)
+  (to (skip-blanks c)
     (cond ((char-whitespace? c)
            (read-char)
            (skip-blanks (peek-char)))
           ('t)))
 
-  (define (char-whitespace? c)
+  (to (char-whitespace? c)
     (memq? c '" 
 	"))
 
@@ -341,7 +341,7 @@
 
   (define sym-quote (intern '"quote"))
 
-  (define (read-dispatch c)
+  (to (read-dispatch c)
     (cond ((eq? c eof-object) eof-object)
           ((eq? c \\) (read-char-literal (read-char)))
           ((eq? c \") (read-string (read-char)))
@@ -350,25 +350,25 @@
           ((eq? c \)) (error "Unbalanced parentheses"))
           ('t (intern (cons c (read-symbol (peek-char)))))))
 
-  (define (read-char-literal c)
+  (to (read-char-literal c)
     (cond ((eq? c eof-object) (error '"EOF in character literal"))
           ('t c)))
 
-  (define (read-string c)
+  (to (read-string c)
     (cond ((eq? c eof-object) (error '"Unterminated string literal"))
           ((eq? c \") '())
           ('t (cons c (read-string (read-char))))))
 
-  (define (read-symbol c)
+  (to (read-symbol c)
     (cond ((char-whitespace? c) '())
           ((memq? c non-symbol-chars) '())
           ('t (read-char) (cons c (read-symbol (peek-char))))))
 
-  (define (read-list)
+  (to (read-list)
     (skip-blanks (peek-char))
     (read-list-dispatch (read-char)))
 
-  (define (read-list-dispatch c)
+  (to (read-list-dispatch c)
     (cond ((eq? c eof-object) (error '"Unterminated list"))
           ((eq? c \)) '())
           ('t (cons (read-dispatch c) (read-list)))))
@@ -381,39 +381,39 @@
 
 ; Eval
 
-- (define (string? x)
+- (to (string? x)
     (cond ((null? x) 't)
           ((char? x) 'f)
           ((char? (car x)) (string? (cdr x)))
           ('t 'f)))
 
-  (define (string=? s t)
+  (to (string=? s t)
     (cond ((null? s) (null? t))
           ((eq? (car s) (car t)) (string=? (cdr s) (cdr t)))
           ('t 'f)))
 
-  (define (memq? x xs)
+  (to (memq? x xs)
     (cond ((null? xs) 'f)
           ((eq? x (car xs)) 't)
           ('t (memq? x (cdr xs)))))
 
-  (define (cons! x xs-cell)
+  (to (cons! x xs-cell)
     (set-car! xs-cell (cons x (car xs-cell))))
 
-  (define (list1 x) (cons x '()))
+  (to (list1 x) (cons x '()))
 
   (define symbols 
     '((t f eof-object define quote cond
 	 eq? null? pair? char? cons car cdr
 	 set-car! read-char peek-char write-char error)))
 
-  (define (symbol? x)
+  (to (symbol? x)
     (memq? x (car symbols)))
 
-  (define (intern s) 
+  (to (intern s) 
     (intern-lookup s (car symbols)))
 
-  (define (intern-lookup s syms)
+  (to (intern-lookup s syms)
     (cond ((null? syms) (cons! s symbols) s)
           ((string=? s (car syms)) (car syms))
           ('t (intern-lookup s (cdr syms)))))
@@ -422,67 +422,67 @@
   (define global-vars (list1 (list1 'eof-object)))
   (define global-vals (list1 (list1 eof-object)))
 
-  (define (eval-form form)
+  (to (eval-form form)
     (cond ((cond ((pair? form) (eq? (car form) 'define))
                  ('t 'f))
            (eval-define (cdr form)))
           ('t (eval form '() '()))))
 
-  (define (eval-define defn)
+  (to (eval-define defn)
     (cond ((symbol? (car defn))
            (define-global (car defn)
                           (eval (car (cdr defn)) '() '())))
           ('t (cons! defn definitions))))
 
-  (define (define-global var val)
+  (to (define-global var val)
     (cons! var global-vars)
     (cons! val global-vals))
 
-  (define (call rator args defs)
+  (to (call rator args defs)
     (cond ((null? defs) (error '"Unknown rator"))
           ((eq? rator (car (car (car defs))))
            (evseq (cdr (car defs)) (cdr (car (car defs))) args))
           ('t (call rator args (cdr defs)))))
 
-  (define (evseq es vars vals)
+  (to (evseq es vars vals)
     (cond ((null? es) 'f)
           ((null? (cdr es)) (eval (car es) vars vals))
           ('t (eval (car es) vars vals)
               (evseq (cdr es) vars vals))))
 
-  (define (eval e vars vals)
+  (to (eval e vars vals)
     (cond ((pair? e) 
            (cond ((symbol? e) (lookup e vars vals))
                  ('t (eval-pair (car e) (cdr e) vars vals))))
           ('t e)))
 
-  (define (eval-pair rator rands vars vals)
+  (to (eval-pair rator rands vars vals)
     (cond ((eq? rator 'quote) (car rands))
           ((eq? rator 'cond) (evcond rands vars vals))
           ('t (apply rator (evlis rands vars vals)))))
 
-  (define (evlis es vars vals)
+  (to (evlis es vars vals)
     (cond ((null? es) '())
           ('t (cons (eval (car es) vars vals)
                     (evlis (cdr es) vars vals)))))
 
-  (define (evcond clauses vars vals)
+  (to (evcond clauses vars vals)
     (cond ((null? clauses) '"No matching cond clause yo")
           ((eval (car (car clauses)) vars vals)
            (evseq (cdr (car clauses)) vars vals))
           ('t (evcond (cdr clauses) vars vals))))
 
-  (define (lookup var vars vals)
+  (to (lookup var vars vals)
     (cond ((null? vars) (lookup1 var (car global-vars) (car global-vals)))
           ((eq? var (car vars)) (car vals))
           ('t (lookup var (cdr vars) (cdr vals)))))
 
-  (define (lookup1 var vars vals)
+  (to (lookup1 var vars vals)
     (cond ((null? vars) (error '"Unbound variable yo"))
           ((eq? var (car vars)) (car vals))
           ('t (lookup1 var (cdr vars) (cdr vals)))))
 
-  (define (apply rator args)
+  (to (apply rator args)
     (cond ((eq? rator 'eq?)          (eq? (car args) (car (cdr args))))
 	  ((eq? rator 'null?)        (null? (car args)))
 	  ((eq? rator 'pair?)        (pair? (car args)))

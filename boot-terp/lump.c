@@ -334,9 +334,10 @@ static obj sym_peek_char;
 static obj sym_read_char;
 static obj sym_set_carB;
 static obj sym_t;
+static obj sym_to;
 static obj sym_write_char;
 
-static obj definitions = nil;
+static obj procedures = nil;
 static obj global_vars = nil;
 static obj global_vals = nil;
 
@@ -360,6 +361,7 @@ set_up (void)
   sym_read_char  = intern (c_string ("read-char"));
   sym_set_carB   = intern (c_string ("set-car!"));
   sym_t          = intern (c_string ("t"));
+  sym_to         = intern (c_string ("to"));
   sym_write_char = intern (c_string ("write-char"));
 
   eof = cons (c_string ("*eof*"), nil);
@@ -584,7 +586,7 @@ apply (obj rator, obj args)
       return sym_f;
     }
   {
-    obj defs = definitions;
+    obj defs = procedures;
     for (; nil != defs; defs = cdr (defs))
       {
 	obj def = car (defs);
@@ -659,23 +661,25 @@ static void
 define (obj definition)
 {
   /* TODO: more syntax checking */
-  if (!is_symbol (car (definition)))
-    definitions = cons (definition, definitions);
-  else
-    {
-      obj var  = car (definition);
-      obj expr = car (cdr (definition));
-      obj val  = eval (expr, nil, nil);
-      global_vars = cons (var, global_vars);
-      global_vals = cons (val, global_vals);
-    }
+  obj var  = car (definition);
+  obj expr = car (cdr (definition));
+  obj val  = eval (expr, nil, nil);
+  global_vars = cons (var, global_vars);
+  global_vals = cons (val, global_vals);
 }
 
 static void
 eval_form (obj x)
 {
-  if (a_pair == get_tag (x) && sym_define == car (x))
-    define (cdr (x));
+  if (a_pair == get_tag (x))
+    {
+      if (sym_define == car (x))
+        define (cdr (x));
+      else if (sym_to == car (x))
+        procedures = cons (cdr (x), procedures);
+      else
+        print (eval (x, nil, nil));
+    }
   else
     print (eval (x, nil, nil));
 }
