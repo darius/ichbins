@@ -35,9 +35,7 @@ does two tests:
       is expected. Then do 'mv ichbins2 ichbins' by hand and do ./bless 
       again; this time it must pass, or something's buggered.
 
-The Lisp dialect implemented here is undocumented, but there's also a
-quick-and-dirty interpreter for it in C in boot-terp/. (I don't know if
-it can still interpret the compiler by now.)
+The Lisp dialect implemented here is documented in Documentation.md.
 
 
 MOTIVATION

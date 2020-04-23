@@ -1,5 +1,3 @@
-XXX give the writeup a proper name
-
 # The language
 
 Ichbins implements (and is written in) a dialect of Lisp, looking most
@@ -93,9 +91,9 @@ undefined behavior, which in practice may blow up the process.)
 - Evaluate each of the top-level expressions in order.
 
 
-## Primitive procedures
+## Primitives
 
-These are built in:
+These procedures are built in:
 
 - `eq?`
 - `null?`, `char?`, `pair?`
@@ -103,8 +101,16 @@ These are built in:
 - `write-char`, `read-char`, `peek-char`
 - `abort` (like C's `exit(1)`)
 
-Scheme's `peek-char` returns the next character from `stdin` but
-without consuming it. It's like C's `getchar()` plus `ungetc()`.
+There are no I/O port objects: `write-char` writes to stdout,
+`read-char` reads from stdin.
+
+The value of `(read-char)` is either a character or `f` (false) for
+end-of-file.
+
+Like Scheme's, `peek-char` acts like `read-char` but without consuming
+the next character. (Or like `getchar()` plus `ungetc()` in C.)
+
+XXX eof-object is different in boot-terp
 
 
 # The bootstrap interpreter
