@@ -4,7 +4,9 @@
 # turn up what I did wrong either.
 
 CC = clang
-SANITIZE = -fsanitize=undefined
+#SANITIZE = -fsanitize=address
+#SANITIZE = -fsanitize=undefined
+SANITIZE = 
 CFLAGS = -g2 -Wall -W $(SANITIZE)
 LDFLAGS = $(SANITIZE)
 

@@ -461,8 +461,11 @@ read_list (void)
       ++in;
       return nil;
     }
-  if (strchr ("(\\\"'", *in) || is_symbol_char (*in))
-    return cons (read (), read_list ());
+  if (*in && (strchr ("(\\\"'", *in) || is_symbol_char (*in)))
+    {
+      obj h = read ();
+      return cons (h, read_list ());
+    }
   error ("lexical error in list");
   return nil;
 }

@@ -138,6 +138,11 @@ which might be of use to clarify the above language spec. It can be
 run via `make test`.
 
 
+# Examples
+
+TODO remark on examples/ and tests/
+
+
 # The compiler
 
 TODO flesh out from Overview.text
