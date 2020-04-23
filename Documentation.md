@@ -9,12 +9,12 @@ I'll assume you're already familiar with Lisp or Scheme.
 
 In Ichbins there are just two basic datatypes: characters and lists. A
 character looks like `\x`, while a list is written out the same way as
-in other Lisps. For instance, this is a list of two lists of
-characters: `((\h \e \l \l \o) (\w \o \r \l \d))`.
+in other Lisps. For instance, `((\h \e \l \l \o) (\w \o \r \l \d))` is
+a list of two lists of characters.
 
-For convenience, a list of characters can also be written as a
-double-quoted string: the above example is the same as `("hello"
-"world")`.
+A list of characters can also be written more compactly as a
+double-quoted string: `("hello" "world")` is the same list of lists,
+just in different notation.
 
 Ichbins also has a notion of symbols, but unlike classical Lisp
 symbols they're not distinct from strings. `(hello world)` is *also* a
@@ -26,17 +26,29 @@ predicate `(symbol? x)` checks if *x* is in that table. So, `(car
 the symbol `hello` is also the string `"hello"`.
 
 Why such a silly design? Because the fewer the datatypes, the less
-code to implement them. In this project for any tradeoff yielding less
-code, unless it would give up readability, I took it. What was given
-up this time, in choosing to minimize the datatypes, was more like
-writability: it became easier to screw up. (Of course this means
-*adversarial* readability suffers, but we're going to assume you trust
+code to implement them. In this project I'd take any tradeoff yielding
+less code, unless it would give up readability. What was given up this
+time, in choosing to minimize the datatypes, was more like
+writability: it became easier to screw up. (Of course this fragility
+hurts *adversarial* readability, but we're going to assume you trust
 the author.)
 
-Finally, a boolean value is represented as a symbol: `f` for false,
-`t` for true.
+Finally, for the same reason of parsimony a boolean value is
+represented as a symbol: `f` for false, `t` for true.
 
 Symbols are case-sensitive.
+
+
+## Read syntax
+
+Ichbins's reader doesn't support dotted pairs. It does expand `'foo`
+into `(quote foo)`.
+
+Strings can include escape sequences, but only `\\` and `\"` are
+useful.
+
+Even comments are not supported. (If desperate, you can fake them with
+literal strings.)
 
 
 ## Expressions
@@ -58,8 +70,6 @@ are no lambda expressions.
 An expression of any other form -- for example, the string `"hey"` --
 is treated as a constant.
 
-Of course there's `'foo` as read syntax for `(quote foo)`.
-
 
 ## Programs
 
@@ -75,16 +85,18 @@ one program:
          (write-char (car chars))
          (say (cdr chars)))))
 (say noun)
-(write-char \ )
+(say " ")
 (say verb)
 ```
 
 So variable definitions look like Scheme's; so do procedure
-definitions but with `to` in place of `define`.
+definitions but with `to` in place of `define`. A procedure's body may
+be a sequence of expressions, not just one.
 
 To run a program:
 
-- First collect all the procedure definitions, associating each procedure name with its parameters and body.
+- First collect all the procedure definitions, associating each
+procedure name with its parameters and body.
 - Collect all the global variable definitions, and evaluate them in
 order. (If one of them refers to one not yet defined, that's
 undefined behavior, which in practice may blow up the process.)
