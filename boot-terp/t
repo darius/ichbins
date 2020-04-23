@@ -403,9 +403,10 @@
   (to (list1 x) (cons x '()))
 
   (define symbols 
-    '((t f eof-object define quote cond
-	 eq? null? pair? char? cons car cdr
-	 set-car! read-char peek-char write-char error)))
+    '((t f eof-object define to quote cond
+         eq? null? pair? char? cons car cdr
+         set-car! read-char peek-char write-char error
+         yes no one two hurray booo x list foo pi y append z)))
 
   (to (symbol? x)
     (memq? x (car symbols)))
@@ -423,16 +424,15 @@
   (define global-vals (list1 (list1 eof-object)))
 
   (to (eval-form form)
-    (cond ((cond ((pair? form) (eq? (car form) 'define))
-                 ('t 'f))
-           (eval-define (cdr form)))
+    (cond ((pair? form)
+           (cond ((eq? (car form) 'define) (eval-define (cdr form)))
+                 ((eq? (car form) 'to) (cons! (cdr form) definitions))
+                 ('t (eval form '() '()))))
           ('t (eval form '() '()))))
 
   (to (eval-define defn)
-    (cond ((symbol? (car defn))
-           (define-global (car defn)
-                          (eval (car (cdr defn)) '() '())))
-          ('t (cons! defn definitions))))
+    (define-global (car defn)
+                   (eval (car (cdr defn)) '() '())))
 
   (to (define-global var val)
     (cons! var global-vars)
@@ -484,16 +484,16 @@
 
   (to (apply rator args)
     (cond ((eq? rator 'eq?)          (eq? (car args) (car (cdr args))))
-	  ((eq? rator 'null?)        (null? (car args)))
-	  ((eq? rator 'pair?)        (pair? (car args)))
-	  ((eq? rator 'char?)        (char? (car args)))
-	  ((eq? rator 'cons)         (cons (car args) (car (cdr args))))
-	  ((eq? rator 'car)          (car (car args)))
-	  ((eq? rator 'cdr)          (cdr (car args)))
-	  ((eq? rator 'set-car!)     (set-car! (car args) (car (cdr args))))
-	  ((eq? rator 'read-char)    (read-char))
-	  ((eq? rator 'peek-char)    (peek-char))
-	  ((eq? rator 'write-char)   (write-char (car args)))
+          ((eq? rator 'null?)        (null? (car args)))
+          ((eq? rator 'pair?)        (pair? (car args)))
+          ((eq? rator 'char?)        (char? (car args)))
+          ((eq? rator 'cons)         (cons (car args) (car (cdr args))))
+          ((eq? rator 'car)          (car (car args)))
+          ((eq? rator 'cdr)          (cdr (car args)))
+          ((eq? rator 'set-car!)     (set-car! (car args) (car (cdr args))))
+          ((eq? rator 'read-char)    (read-char))
+          ((eq? rator 'peek-char)    (peek-char))
+          ((eq? rator 'write-char)   (write-char (car args)))
           ((eq? rator 'error)        (error (car args)))
           ('t (call rator args (car definitions)))))
 
@@ -510,12 +510,12 @@
   (eval-form '(null? '()))
   (eval-form '(eq? (pair? '()) 'f))
   (intern 'x)
-  (eval-form '(define (list x) (cons x '())))
+  (eval-form '(to (list x) (cons x '())))
   (eval-form '(list 'foo))
   (eval-form '(define pi '"3.14159"))
   (eval-form 'pi)
   (intern 'y)
-  (eval-form '(define (append x y)
+  (eval-form '(to (append x y)
                 (cond ((null? x) y)
                       ('t (cons (car x) (append (cdr x) y))))))
   (eval-form '(append '(a b c) '(x y z)))
