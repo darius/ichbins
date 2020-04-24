@@ -136,9 +136,95 @@ which might be of use to clarify the above language spec. It can be
 run via `make test`.
 
 
-# Examples
+# Example programs
 
 TODO remark on examples/ and tests/
+
+
+# An example of compilation
+
+Before we tackle the compiler, let's see the C code it generates for
+an Ichbins program. This program writes `((\H \i) (\M \o \m))`,
+exercising all the form and expression types:
+
+```
+(to (write x)
+  (cond ((char? x) (write-char \\) (write-char x))
+        ('t (write-char \()
+            (cond ((pair? x)
+                   (write (car x))
+                   (write-each (cdr x))))
+            (write-char \)))))
+
+(to (write-each xs)
+  (cond ((null? xs) 'f)
+        ('t (write-char \ )
+            (write (car xs))
+            (write-each (cdr xs)))))
+
+(define message '("Hi" "Mom"))
+(write message)
+```
+
+Here's its compiled C code, slightly out of order and reformatted, plus
+comments, for the sake of exposition:
+
+```
+int main() { run(NULL, 0); return 0; }
+```
+
+All of the above program becomes the `run` function in C, starting
+with initialization:
+
+```
+// Call a compiled function, given its arguments on the stack starting at
+// stack[bp]. (Or if function==NULL, then run the whole program.)
+// The `function` is represented by a label pointer (a feature of GNU
+// C, not standard C).
+void run(void **function, int bp) {
+    if (function) goto *function;
+
+    // First set up the stack, heap, and global variables:
+
+    push(entag(a_char, 't'));
+    push(nil);
+    prim2_cons();
+    assert(var_Dt == sp);     // Now stack[var_Dt] holds the symbol `t`
+
+    push(entag(a_char, 'f'));
+    push(nil);
+    prim2_cons();
+    assert(var_Df == sp);     // Now stack[var_Dt] holds the symbol `f`
+
+    push(entag(a_char, 'H'));
+    push(entag(a_char, 'i'));
+    push(nil);
+    prim2_cons();
+    prim2_cons();
+    push(entag(a_char, 'M'));
+    push(entag(a_char, 'o'));
+    push(entag(a_char, 'm'));
+    push(nil);
+    prim2_cons();
+    prim2_cons();
+    prim2_cons();
+    push(nil);
+    prim2_cons();
+    prim2_cons();
+    assert(var_message == sp); // Now stack[var_message] holds `("Hi Mom")`
+
+    // Then perform the top-level expressions:
+    bp = sp + 1; goto proc_main;
+
+ proc_main: {
+        assert(0 == sp - bp + 1);
+        // Perform `(write message)`:
+        push(stack[var_message]);
+        TAILCALL(proc_write, 1);
+    }
+```
+
+
 
 
 # The compiler
