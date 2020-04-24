@@ -1,12 +1,9 @@
-# Nowadays this segfaults if you compile with gcc. I guess there must be some
-# undefined behavior, because I failed to easily track down the problem in gdb.
-# As a stopgap here we compile with Clang. Sadly the sanitizer switch doesn't
-# turn up what I did wrong either.
-
-CC = clang
+# Some optional sanity checking:
+#CC = clang
 #SANITIZE = -fsanitize=address
 #SANITIZE = -fsanitize=undefined
 SANITIZE = 
+
 CFLAGS = -g2 -Wall -W $(SANITIZE)
 LDFLAGS = $(SANITIZE)
 

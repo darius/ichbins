@@ -122,16 +122,14 @@ end-of-file.
 Like Scheme's, `peek-char` acts like `read-char` but without consuming
 the next character. (Or like `getchar()` plus `ungetc()` in C.)
 
-XXX eof-object is different in boot-terp
-
 
 # The bootstrap interpreter
 
 To start the cycle of life there was an interpreter in C, in
 `boot-terp/`. It's unmaintained now; I might someday go back to make
-sure it can still build the compiler (and to fix the segfaults I'm
-guilty of; I suppose that must come down to undefined behavior which
-used to work in the gcc of the time).
+sure it can still build the compiler. (XXX There's at least one update
+needed: end-of-file is signaled differently in boot-terp than in the
+compiler's language.)
 
 In `boot-terp/t` is a sequence of unit tests for the interpreter,
 which might be of use to clarify the above language spec. It can be

@@ -613,8 +613,10 @@ evlis (obj rands, obj vars, obj vals)
   if (nil == rands)
     return nil;
   if (a_pair == get_tag (rands))
-    return cons (eval (car (rands), vars, vals), 
-		 evlis (cdr (rands), vars, vals));
+    {
+      obj arg = eval (car (rands), vars, vals);
+      return cons (arg, evlis (cdr (rands), vars, vals));
+    }
   error ("Non-list operand list");
   return nil;
 }
